@@ -1,5 +1,6 @@
 const socket = io();
 let connectionsUsers = [];
+let connectionInSupport = [];
 
 socket.on('admin_list_all_users', connections => {
   connectionsUsers = connections;
@@ -19,6 +20,8 @@ socket.on('admin_list_all_users', connections => {
 
 function call(id) {
   const connection = connectionsUsers.find(connection => connection.socket_id === id);
+
+  connectionInSupport.push(connection);
 
   const template = document.getElementById('admin_template').innerHTML;
 
@@ -53,7 +56,7 @@ function call(id) {
         createDiv.className = 'admin_message_admin';
 
         createDiv.innerHTML = `Atendente: <span>${message.text}</span>`;
-        createDiv.innerHTML += `<span class="admin_date>${dayjs(
+        createDiv.innerHTML += `<span class="admin_date">${dayjs(
           message.created_at,
         ).format('DD/MM/YYYY HH:mm:ss')}`;
       }
@@ -78,7 +81,7 @@ function sendMessage(id) {
   const createDiv = document.createElement('div');
   createDiv.className = 'admin_message_admin';
   createDiv.innerHTML = `Atendente: <span>${params.text}</span>`;
-  createDiv.innerHTML += `<span class="admin_date>${dayjs().format(
+  createDiv.innerHTML += `<span class="admin_date">${dayjs().format(
     'DD/MM/YYYY HH:mm:ss',
   )}`;
 
@@ -88,9 +91,8 @@ function sendMessage(id) {
 }
 
 socket.on('admin_receive_message', data => {
-  console.log(data);
-  const connection = connectionsUsers.find(
-    connection => (connection.socket_id = data.socket_id),
+  const connection = connectionInSupport.find(
+    connection => connection.socket_id === data.socket_id,
   );
 
   const divMessages = document.getElementById(`allMessages${connection.user_id}`);
